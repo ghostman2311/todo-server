@@ -6,53 +6,51 @@ import dotenv from "dotenv";
 const app = express();
 dotenv.config();
 
-let notes = [
-  {
-    id: "1",
-    title: "My First note",
-    content: "Hey there this is my first note",
-  },
-];
-
 const start = async () => {
   const client = await MongoClient.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
 
-  const noteDb = await client.db("note-app-db").collections("notes");
-  console.log(noteDb);
+  const noteDb = await client.db("note-app-db").collection("notes");
+
   app.use(express.json());
 
-  app.get("/notes", (req, res) => {
+  app.get("/notes", async (req, res) => {
+    const notes = await noteDb.find({}).toArray();
     res.json(notes);
   });
 
-  app.post("/notes", (req, res) => {
+  app.post("/notes", async (req, res) => {
     const { title } = req.body;
-    notes.push({
+    await noteDb.insertOne({
       title,
       id: uuid(),
       content: "",
     });
-
+    const notes = await noteDb.find({}).toArray();
     res.json(notes);
   });
 
-  app.put("/notes/:noteID", (req, res) => {
+  app.put("/notes/:noteID", async (req, res) => {
     const { noteID } = req.params;
     const { title, content } = req.body;
-    notes = notes.map((note) =>
-      note.id === noteID ? { id: noteID, title, content } : note
+    await noteDb.updateOne(
+      { id: noteID },
+      {
+        $set: { title, content },
+      }
     );
 
-    res.json(notes);
+    const updatedNotes = await noteDb.find({}).toArray();
+    res.json(updatedNotes);
   });
 
-  app.delete("/notes/:noteID", (req, res) => {
+  app.delete("/notes/:noteID", async (req, res) => {
     const { noteID } = req.params;
-    notes = notes.filter((note) => note.id !== noteID);
-    res.json(notes);
+    await noteDb.deleteOne({ id: noteID });
+    const udpdatedNotes = await noteDb.find({}).toArray();
+    res.json(udpdatedNotes);
   });
 
   app.listen(8080, () => {
