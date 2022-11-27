@@ -6,13 +6,18 @@ const createNoteRoute = {
   method: "post",
   handler: async (req, res) => {
     const { title } = req.body;
-    await noteDb.insertOne({
+    const newNote = {
       title,
       id: uuid(),
       content: "",
+    };
+    const result = await noteDb.insertOne(newNote);
+    const mongoId = result.insertedId;
+
+    res.json({
+      ...newNote,
+      _id: mongoId,
     });
-    const notes = await noteDb.find({}).toArray();
-    res.json(notes);
   },
 };
 

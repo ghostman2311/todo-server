@@ -6,15 +6,17 @@ const updateNoteRoute = {
   handler: async (req, res) => {
     const { noteID } = req.params;
     const { title, content } = req.body;
-    await noteDb.updateOne(
+    const result = await noteDb.findOneAndUpdate(
       { id: noteID },
       {
         $set: { title, content },
+      },
+      {
+        returnDocument: "after",
       }
     );
 
-    const updatedNotes = await noteDb.find({}).toArray();
-    res.json(updatedNotes);
+    res.json(result.value);
   },
 };
 
