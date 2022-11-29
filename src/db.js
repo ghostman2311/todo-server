@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 
 let client = null;
 let noteDb = null;
+let userDb = null;
 dotenv.config();
 
 const initializeDbConnection = async () => {
@@ -12,6 +13,7 @@ const initializeDbConnection = async () => {
   });
 
   noteDb = await client.db("note-app-db").collection("note");
+  userDb = await client.db("note-app-db").collection("users");
 };
 
-export { noteDb, initializeDbConnection };
+export { noteDb, initializeDbConnection, userDb };
