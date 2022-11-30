@@ -1,17 +1,26 @@
-import { noteDb } from "../db";
+import { noteDb, userDb } from "../db";
 import { v4 as uuid } from "uuid";
 
 const createNoteRoute = {
-  path: "/notes",
+  path: "/users/:userId/notes",
   method: "post",
   handler: async (req, res) => {
+    const { userId } = req.params;
     const { title } = req.body;
+    const newNoteId = uuid();
     const newNote = {
       title,
-      id: uuid(),
+      id: newNoteId,
       content: "",
+      createdBy: userId,
     };
     const result = await noteDb.insertOne(newNote);
+    await userDb.updateOne(
+      { authID: userId },
+      {
+        $push: { notes: newNoteId },
+      }
+    );
     const mongoId = result.insertedId;
 
     res.json({
