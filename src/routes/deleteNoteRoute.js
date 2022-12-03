@@ -8,7 +8,7 @@ const deleteNoteRoute = {
     const result = await noteDb.findOneAndDelete({ id: noteID });
     const deletedNote = result.value;
     await userDb.updateOne(
-      { id: deletedNote.createdBy },
+      { authID: deletedNote.createdBy },
       {
         $pull: { notes: deletedNote.id },
       }
