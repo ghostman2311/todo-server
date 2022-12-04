@@ -1,22 +1,34 @@
 import { noteDb } from "../db";
+import * as admin from "firebase-admin";
 
 const updateNoteRoute = {
   path: "/notes/:noteID",
   method: "put",
   handler: async (req, res) => {
-    const { noteID } = req.params;
-    const { title, content } = req.body;
-    const result = await noteDb.findOneAndUpdate(
-      { id: noteID },
-      {
-        $set: { title, content },
-      },
-      {
-        returnDocument: "after",
+    try {
+      const { authtoken } = req.headers;
+      const authUser = await admin.auth().verifyIdToken(authtoken);
+      const { noteID } = req.params;
+      const note = await noteDb.findOne({ id: noteID });
+      if (note.createdBy !== authUser.uid) {
+        return res.sendStatus(403);
       }
-    );
+      const { title, content } = req.body;
+      const result = await noteDb.findOneAndUpdate(
+        { id: noteID },
+        {
+          $set: { title, content },
+        },
+        {
+          returnDocument: "after",
+        }
+      );
 
-    res.json(result.value);
+      res.json(result.value);
+    } catch (e) {
+      console.log(e);
+      res.sendStatus(401);
+    }
   },
 };
 
