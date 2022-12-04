@@ -12,7 +12,7 @@ const start = async () => {
   await initializeDbConnection();
   app.use(express.json());
   routes.forEach((route) => {
-    app[route.method](route.path, route.handler);
+    app[route.method](route.path, ...route.middleware, route.handler);
   });
 
   app.listen(8080, () => {

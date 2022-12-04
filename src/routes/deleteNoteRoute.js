@@ -1,9 +1,11 @@
 import { noteDb, userDb } from "../db";
 import * as admin from "firebase-admin";
+import { verifyToken } from "../middlewares/verifyToken";
 
 const deleteNoteRoute = {
   path: "/notes/:noteID",
   method: "delete",
+  middleware: [verifyToken],
   handler: async (req, res) => {
     try {
       const { noteID } = req.params;

@@ -1,9 +1,11 @@
 import { noteDb } from "../db";
 import * as admin from "firebase-admin";
+import { verifyToken } from "../middlewares/verifyToken";
 
 const updateNoteRoute = {
   path: "/notes/:noteID",
   method: "put",
+  middleware: [verifyToken],
   handler: async (req, res) => {
     try {
       const { authtoken } = req.headers;

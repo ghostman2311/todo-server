@@ -1,10 +1,12 @@
 import { noteDb, userDb } from "../db";
 import { v4 as uuid } from "uuid";
 import * as admin from "firebase-admin";
+import { verifyToken } from "../middlewares/verifyToken";
 
 const createNoteRoute = {
   path: "/users/:userId/notes",
   method: "post",
+  middleware: [verifyToken],
   handler: async (req, res) => {
     try {
       const { authtoken } = req.headers;
