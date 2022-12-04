@@ -1,32 +1,44 @@
 import { noteDb, userDb } from "../db";
 import { v4 as uuid } from "uuid";
+import * as admin from "firebase-admin";
 
 const createNoteRoute = {
   path: "/users/:userId/notes",
   method: "post",
   handler: async (req, res) => {
-    const { userId } = req.params;
-    const { title } = req.body;
-    const newNoteId = uuid();
-    const newNote = {
-      title,
-      id: newNoteId,
-      content: "",
-      createdBy: userId,
-    };
-    const result = await noteDb.insertOne(newNote);
-    await userDb.updateOne(
-      { authID: userId },
-      {
-        $push: { notes: newNoteId },
-      }
-    );
-    const mongoId = result.insertedId;
+    try {
+      const { authtoken } = req.headers;
+      const authUser = await admin.auth().verifyIdToken(authtoken);
+      const { userId } = req.params;
 
-    res.json({
-      ...newNote,
-      _id: mongoId,
-    });
+      if (authUser.uid !== userId) {
+        return res.sendStatus(403);
+      }
+      const { title } = req.body;
+      const newNoteId = uuid();
+      const newNote = {
+        title,
+        id: newNoteId,
+        content: "",
+        createdBy: userId,
+      };
+      const result = await noteDb.insertOne(newNote);
+      await userDb.updateOne(
+        { authID: userId },
+        {
+          $push: { notes: newNoteId },
+        }
+      );
+      const mongoId = result.insertedId;
+
+      res.json({
+        ...newNote,
+        _id: mongoId,
+      });
+    } catch (e) {
+      console.log(e);
+      res.sendStatus(401);
+    }
   },
 };
 
