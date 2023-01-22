@@ -8,8 +8,6 @@ const updateNoteRoute = {
   middleware: [verifyToken],
   handler: async (req, res) => {
     try {
-      const { authtoken } = req.headers;
-      const authUser = await admin.auth().verifyIdToken(authtoken);
       const { noteID } = req.params;
       const note = await noteDb.findOne({ id: noteID });
       if (note.createdBy !== authUser.uid) {
