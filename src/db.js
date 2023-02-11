@@ -1,19 +1,22 @@
 import { MongoClient } from "mongodb";
-import dotenv from "dotenv";
 
-let client = null;
-let noteDb = null;
-let userDb = null;
-dotenv.config();
-
+export let client = null;
+export let notesDb;
 const initializeDbConnection = async () => {
-  client = await MongoClient.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  client = new MongoClient(
+    "mongodb+srv://mongodb:admin@project.3usro.mongodb.net/?retryWrites=true&w=majority",
+    {
+      useNewUrlParser: true,
+    }
+  );
 
-  noteDb = await client.db("note-app-db").collection("note");
-  userDb = await client.db("note-app-db").collection("users");
+  try {
+    await client.connect();
+    notesDb = client.db("notesdb").collection("notes");
+    console.log("database connected successfully");
+  } catch (err) {
+    console.log(err);
+  }
 };
 
-export { noteDb, initializeDbConnection, userDb };
+export { initializeDbConnection };

@@ -1,13 +1,5 @@
-import { createNoteRoute } from "./createNoteRoute";
-import { readNoteRoute } from "./readNoteRoute";
-import { updateNoteRoute } from "./updateNoteRoute";
-import { deleteNoteRoute } from "./deleteNoteRoute";
-
-const routes = [
-  createNoteRoute,
-  deleteNoteRoute,
-  readNoteRoute,
-  updateNoteRoute,
-];
-
-export { routes };
+import { createNote } from "./createNote";
+import { deleteNote } from "./deleteNote";
+import { listNote } from "./listNote";
+import { updatedNote } from "./updateNote";
+export const routes = [createNote, listNote, updatedNote, deleteNote];
